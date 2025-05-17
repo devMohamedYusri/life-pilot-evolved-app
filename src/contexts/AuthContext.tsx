@@ -46,18 +46,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return storedUsers ? JSON.parse(storedUsers) : mockUsers;
   });
 
-  useEffect(() => {
-    // Check if user is already logged in via localStorage
+  // Check for user authentication on initialization and window focus
+  const checkAuthState = () => {
     const storedUser = localStorage.getItem('lifepilot_user');
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        return true;
       } catch (error) {
         console.error('Failed to parse stored user:', error);
         localStorage.removeItem('lifepilot_user');
       }
     }
+    return false;
+  };
+
+  useEffect(() => {
+    // Check if user is already logged in via localStorage
+    checkAuthState();
     setIsLoading(false);
+    
+    // Add event listener for when the window regains focus
+    const handleFocus = () => {
+      checkAuthState();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Save registered users to localStorage
