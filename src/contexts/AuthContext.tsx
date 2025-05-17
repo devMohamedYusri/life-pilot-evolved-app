@@ -40,6 +40,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     },
   ];
 
+  // Store registered users from signup flow
+  const [registeredUsers, setRegisteredUsers] = useState(() => {
+    const storedUsers = localStorage.getItem('lifepilot_registered_users');
+    return storedUsers ? JSON.parse(storedUsers) : mockUsers;
+  });
+
   useEffect(() => {
     // Check if user is already logged in via localStorage
     const storedUser = localStorage.getItem('lifepilot_user');
@@ -54,13 +60,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
+  // Save registered users to localStorage
+  useEffect(() => {
+    localStorage.setItem('lifepilot_registered_users', JSON.stringify(registeredUsers));
+  }, [registeredUsers]);
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const foundUser = mockUsers.find(
+      // Check both mock users and registered users
+      const foundUser = registeredUsers.find(
         u => u.email === email && u.password === password
       );
       
@@ -102,14 +114,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Check if user already exists
-      const userExists = mockUsers.some(u => u.email === email);
+      const userExists = registeredUsers.some(u => u.email === email);
       if (userExists) {
         throw new Error('Email already in use');
       }
       
-      // Create new user (in a real app, this would be sent to an API)
+      // Create new user
       const newUser = {
-        id: String(mockUsers.length + 1),
+        id: String(registeredUsers.length + 1),
         firstName,
         lastName,
         email,
@@ -117,7 +129,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         avatar: '',
       };
       
-      mockUsers.push(newUser);
+      // Add to registered users
+      setRegisteredUsers(prev => [...prev, newUser]);
       
       // Remove password from user object before storing
       const { password: _, ...userWithoutPassword } = newUser;
@@ -160,7 +173,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Check if user exists
-      const userExists = mockUsers.some(u => u.email === email);
+      const userExists = registeredUsers.some(u => u.email === email);
       if (!userExists) {
         throw new Error('No account found with that email');
       }
