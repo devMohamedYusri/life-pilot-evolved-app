@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -141,7 +140,7 @@ export default function Journal() {
                   mode="single"
                   selected={selectedDate}
                   onSelect={setSelectedDate}
-                  className="rounded-md border"
+                  className="rounded-md border p-3 pointer-events-auto"
                   modifiers={{
                     hasEntry: hasEntryOnDate,
                   }}
@@ -152,7 +151,6 @@ export default function Journal() {
                       textDecorationColor: 'hsl(var(--primary))',
                     },
                   }}
-                  className={`p-3 pointer-events-auto`}
                 />
               </CardContent>
             </Card>
